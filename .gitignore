@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+*.log
+*.pem
+*.key
+*.pfx
+*.apk
+*.msix
+*.AppxBundle
+status.json
+config.json
+phone-wallpaper.*
+state/
+outputs/

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.tahoe-desktop" path="/org/gnome/shell/extensions/tahoe-desktop/">
+    <key name="show-wifi" type="b"><default>true</default><summary>Show the network indicator</summary></key>
+    <key name="show-battery" type="b"><default>true</default><summary>Show the battery indicator</summary></key>
+    <key name="show-search" type="b"><default>true</default><summary>Show application search</summary></key>
+    <key name="show-control-center" type="b"><default>true</default><summary>Show Control Center</summary></key>
+    <key name="show-system-monitor" type="b"><default>false</default><summary>Show system monitor indicators</summary></key>
+    <key name="show-force-quit" type="b"><default>false</default><summary>Show the Force Quit toolbar button</summary></key>
+  </schema>
+</schemalist>

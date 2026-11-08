@@ -1,0 +1,113 @@
+.tahoe-system-menu .popup-menu-content {
+    min-width: 19em;
+    padding: 7px;
+    border-radius: 16px;
+}
+
+.tahoe-system-menu .popup-menu-item {
+    spacing: 10px;
+    padding: 6px 10px;
+    border-radius: 7px;
+}
+
+.tahoe-system-menu .popup-menu-icon {
+    icon-size: 16px;
+}
+
+.tahoe-system-menu .popup-separator-menu-item {
+    padding: 4px 9px;
+}
+
+.tahoe-applications-dialog {
+    padding: 0;
+    border-radius: 28px;
+    background-color: rgba(27, 35, 56, 0.88);
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    box-shadow: 0 20px 70px 8px rgba(0, 0, 0, 0.35);
+    color: #f2f4fa;
+}
+
+.tahoe-applications-dialog .modal-dialog-content-box,
+.tahoe-applications-content {
+    padding: 22px 24px 14px;
+    spacing: 13px;
+}
+
+.tahoe-applications-dialog .modal-dialog-button-box { padding: 0; height: 0; }
+.tahoe-applications-header { spacing: 14px; padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12); }
+.tahoe-applications-search { font-size: 22px; font-weight: 400; padding: 2px 0;
+    background: transparent; border: none; box-shadow: none; color: #f5f6fb;
+    min-height: 30px; caret-color: #d9e6ff; }
+.tahoe-applications-search:focus { border: none; box-shadow: none; }
+.tahoe-applications-search StLabel { color: #c9cfdd; }
+.tahoe-applications-close { padding: 7px; border-radius: 999px; color: #c1cada; }
+.tahoe-applications-close:hover { background-color: rgba(255, 255, 255, 0.12); }
+.tahoe-applications-categories { spacing: 7px; }
+.tahoe-applications-category { padding: 6px 9px; border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.08); font-size: 11px; color: #c9d2e4; }
+.tahoe-applications-category:hover { background-color: rgba(255, 255, 255, 0.15); }
+.tahoe-applications-category:checked { background-color: #4c83ed; color: white; }
+.tahoe-applications-scroll { min-height: 200px; }
+.tahoe-application-tile { padding: 6px 4px 4px; border-radius: 16px; height: 100px; }
+.tahoe-application-tile:hover { background-color: rgba(255, 255, 255, 0.11); }
+.tahoe-application-tile:focus { background-color: rgba(88, 139, 239, 0.24);
+    box-shadow: inset 0 0 0 2px rgba(112, 163, 255, 0.8); }
+.tahoe-application-tile-content { spacing: 7px; }
+.tahoe-application-name { font-size: 12px; color: #f0f3fa; text-align: center; height: 30px; }
+.tahoe-applications-empty { padding: 60px 10px; color: #b6c1d7; font-size: 16px; }
+.tahoe-applications-count { font-size: 10px; color: #9eacc5; padding-top: 3px; }
+
+.tahoe-status-button { -natural-hpadding: 7px; -minimum-hpadding: 5px; }
+.tahoe-status-button .system-status-icon { icon-size: 17px; }
+.tahoe-control-center-icon { icon-size: 20px; }
+
+.tahoe-applications-body { spacing: 22px; }
+.tahoe-applications-main { spacing: 12px; }
+.tahoe-phone-pane { spacing: 14px; padding-left: 20px;
+    border-left: 1px solid rgba(255, 255, 255, 0.12); }
+.tahoe-phone-icon { padding: 14px 0 8px; color: #c6d7f3; }
+.tahoe-phone-name { font-size: 18px; font-weight: 600; }
+.tahoe-phone-state, .tahoe-phone-battery { font-size: 12px; color: #bfd0ea; }
+.tahoe-phone-message { font-size: 11px; color: #9eacc5; }
+.tahoe-phone-actions { spacing: 10px; }
+.tahoe-phone-action { border-radius: 12px; padding: 10px 12px;
+    background-color: rgba(112, 159, 237, 0.18); color: #f0f5ff; }
+.tahoe-phone-action:hover, .tahoe-phone-action:focus {
+    background-color: rgba(112, 159, 237, 0.32); }
+
+/* Phone companion layout adapted from the supplied Start menu reference. */
+.tahoe-phone-pane { spacing: 9px; padding: 0 0 0 22px; }
+.tahoe-phone-heading { font-size: 12px; color: #c9cdd6; padding-bottom: 6px; }
+.tahoe-phone-more { padding: 2px 5px; border-radius: 7px; }
+.tahoe-phone-more:hover { background-color: rgba(255,255,255,0.10); }
+.tahoe-phone-icon { padding: 3px 0 7px; }
+.tahoe-phone-name { font-size: 18px; font-weight: 600; padding-top: 2px; }
+.tahoe-phone-state { font-size: 11px; color: #a8aebc; }
+.tahoe-phone-state.connected { color: #83d0a6; }
+.tahoe-phone-battery { font-size: 12px; color: #d0d7e7; }
+.tahoe-phone-links { spacing: 3px; padding-top: 12px; padding-bottom: 10px; }
+.tahoe-phone-shortcut { border-radius: 8px; padding: 9px 10px; text-align: left; }
+.tahoe-phone-shortcut-row { spacing: 14px; }
+.tahoe-phone-shortcut:hover, .tahoe-phone-shortcut:focus { background-color: rgba(255,255,255,0.09); }
+.tahoe-phone-shortcut.unavailable { color: #737c8d; }
+.tahoe-phone-recents { spacing: 7px; padding-top: 13px; border-top: 1px solid rgba(255,255,255,0.08); }
+.tahoe-phone-actions { spacing: 7px; padding-top: 9px; }
+.tahoe-phone-action { border-radius: 8px; padding: 10px 12px; background-color: rgba(255,255,255,0.06); }
+
+/* Native phone companion from the supplied HTML Start menu mockup. */
+.tahoe-phone-pane { background-color: rgba(33,39,51,0.48); border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 18px; padding: 16px 17px 12px; spacing: 8px; }
+.tahoe-phone-heading { font-size: 13px; font-weight: 600; color: #d8dce5; }
+.tahoe-phone-device-card { spacing: 7px; padding: 7px 0 5px; }
+.tahoe-phone-real-preview { border: 2px solid rgba(150,160,171,0.7); border-radius: 12px;
+    box-shadow: 0 3px 10px 0 rgba(0,0,0,0.32); }
+.tahoe-phone-name { font-size: 16px; padding-top: 3px; text-align: center; }
+.tahoe-phone-battery { font-size: 10px; text-align: center; color: #c6cedd; }
+.tahoe-phone-state { font-size: 10px; text-align: center; }
+.tahoe-phone-links { padding: 4px 0; spacing: 1px; }
+.tahoe-phone-shortcut { padding: 8px 9px; font-size: 12px; }
+.tahoe-phone-recents { padding-top: 9px; spacing: 3px; }
+.tahoe-phone-recent { spacing: 0; }
+.tahoe-phone-recent-caption { padding: 0 0 6px 41px; color: #9faabc; font-size: 10px; }
+.tahoe-phone-action { padding: 9px 11px; font-size: 11px; text-align: left; }

@@ -1,0 +1,6 @@
+grpcio-tools==1.85.1
+cryptography==50.0.2
+
+msgpack==1.2.4
+websockets==17.4
+qrcode==8.2

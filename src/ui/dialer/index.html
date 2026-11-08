@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'"><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Phone Link · Dialer</title><meta name="description" content="A focused, interactive Phone Link dialer mockup. Dial a number, find a contact, or return a call."><meta name="theme-color" content="#20232b"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='5' y='2' width='14' height='20' rx='3' fill='%238acfff'/%3E%3Cpath d='M10 18h4' stroke='%231b3650' stroke-width='2'/%3E%3C/svg%3E"><link rel="stylesheet" href="style.css"></head>
+<body>
+<div class="ambient" aria-hidden="true"></div>
+<div class="dialer-app" id="dialer-app">
+ <header class="titlebar"><div class="brand"><span class="phone-link-mark" aria-hidden="true"><i></i><i></i></span><span>Phone Link</span><span class="brand-separator"></span><span class="brand-subtitle">Dialer</span></div><div class="title-actions"><span class="preview-label">PREVIEW</span><button class="icon-button" id="theme-toggle" aria-label="Switch to light theme" title="Switch theme"></button><button class="icon-button" id="about-button" aria-label="About this dialer" title="About this dialer"></button></div></header>
+ <div class="app-body">
+  <section class="activity-panel" id="activity-panel" aria-label="Call activity">
+   <div class="activity-header"><h1>Calls</h1><button class="icon-button mobile-close" id="close-activity" aria-label="Back to keypad"></button><div class="device-status"><span class="connected-dot"></span><span>POCO F8 Ultra</span><span class="status-divider">·</span><span>Connected</span></div></div>
+   <div class="activity-tabs" role="tablist" aria-label="Call lists"><button role="tab" aria-selected="true" aria-controls="activity-content" id="tab-recent" data-tab="recent">Recent</button><button role="tab" aria-selected="false" aria-controls="activity-content" id="tab-contacts" data-tab="contacts" tabindex="-1">Contacts</button><button role="tab" aria-selected="false" aria-controls="activity-content" id="tab-favorites" data-tab="favorites" tabindex="-1">Favorites</button></div>
+   <label class="search-box"><span id="search-icon"></span><input type="search" id="contact-search" placeholder="Search names or numbers" aria-label="Search names or numbers" autocomplete="off"></label>
+   <div class="activity-content" id="activity-content" role="tabpanel" aria-labelledby="tab-recent"></div>
+   <div class="activity-footer"><span id="bluetooth-icon"></span><span>Calling through your phone</span><span class="battery" id="battery-status"></span></div>
+  </section>
+  <section class="dial-panel" id="dial-panel" tabindex="-1" aria-label="Phone keypad"></section>
+ </div>
+ <footer class="app-footer"><span><span class="connected-dot"></span>Phone connected via Bluetooth</span><span>Phone Link · Ubuntu</span></footer>
+</div>
+<div class="toast" id="toast" role="status"></div><div id="dialog-root"></div>
+<script src="icons.js"></script><script src="native.js"></script>
+</body></html>

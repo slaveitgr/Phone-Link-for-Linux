@@ -1,0 +1,8 @@
+{
+  "uuid": "tahoe-system-menu@mike.local",
+  "name": "Tahoe Desktop Menus",
+  "description": "Tahoe-style Apple and application menus, floating app launcher, native system indicators and a Steam menu adapter.",
+  "shell-version": ["51"],
+  "settings-schema": "org.gnome.shell.extensions.tahoe-desktop",
+  "version": 6
+}
