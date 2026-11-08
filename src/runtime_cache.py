@@ -16,6 +16,11 @@ _results={}
 _clipboard=None
 _contacts=[]
 _contacts_status="search_required"
+_contacts_full=False
+_call_history=[]
+_phone_favorites=[]
+_history_status="syncing"
+_favorites_status="syncing"
 
 def update_notifications(records,*,replace=False,removed=()):
     global _sync
@@ -35,7 +40,7 @@ def update_notifications(records,*,replace=False,removed=()):
 def snapshot():
     with _lock:
         return {'schema_version':1,'notifications_synced':_sync,
-            'notifications':list(_notifications.values()),'contacts':list(_contacts),'contacts_status':_contacts_status,'clipboard':_clipboard,'command_results':dict(_results),
+            'notifications':list(_notifications.values()),'contacts':list(_contacts),'contacts_status':_contacts_status,'contacts_full':_contacts_full,'call_history':list(_call_history),'phone_favorites':list(_phone_favorites),'history_status':_history_status,'favorites_status':_favorites_status,'clipboard':_clipboard,'command_results':dict(_results),
             'updated_at':datetime.now(timezone.utc).isoformat()}
 
 class _Handler(socketserver.StreamRequestHandler):
@@ -85,7 +90,7 @@ def read_snapshot():
         client.settimeout(1)
         client.connect(str(SOCKET));client.sendall(b'view\n')
         with client.makefile('rb') as stream:
-            raw=stream.readline(512*1024)
+            raw=stream.readline(8*1024*1024)
     return json.loads(raw)
 
 
@@ -111,13 +116,23 @@ def send_clipboard(text):
     return json.loads(raw)
 
 
-def update_contacts(records,status='ok'):
-    global _contacts,_contacts_status
+def update_contacts(records,status='ok',*,full=False):
+    global _contacts,_contacts_status,_contacts_full
     with _lock:
-        _contacts=list(records[:1000]);_contacts_status=status
+        if _contacts_full and not full:return
+        _contacts=list(records[:20000]);_contacts_status=status;_contacts_full=full
 
 def search_contacts(query):
     with socket.socket(socket.AF_UNIX,socket.SOCK_STREAM) as client:
         client.settimeout(2);client.connect(str(SOCKET))
         client.sendall(json.dumps({'action':'search_contacts','query':query}).encode()+b'\n')
         with client.makefile('rb') as stream:return json.loads(stream.readline(4096))
+
+
+def update_call_history(records,status='ok'):
+    global _call_history,_history_status
+    with _lock:_call_history=list(records[:2000]);_history_status=status
+
+def update_phone_favorites(records,status='ok'):
+    global _phone_favorites,_favorites_status
+    with _lock:_phone_favorites=list(records[:20000]);_favorites_status=status

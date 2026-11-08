@@ -16,6 +16,7 @@ from value_set_codec import connection_configuration,clipboard_request
 from remote_lock import safe_shell_available,handle_modern,handle_legacy,RESOURCE_PATH as LOCK_PATH
 from pc_status import build_status_response,build_status_publication
 from pc_session import is_locked
+from pc_clipboard_status import build_status_response as build_clipboard_status
 sys.path.insert(0,str(Path(__file__).resolve().parent/'generated'))
 from platform_sdk.v1.device_resource_manager_pb2 import DeviceResourceManagerMessage,DeviceResourceManagerResponseMessage
 from device_info.v1.status_pb2 import DeviceStatusResponseMessage,DeviceStatusRequestMessage
@@ -287,6 +288,8 @@ async def run(account,*,duration=None,profile="PL"):
                                         response_payload=None
                                         if request.resource_path=='/remotedevicestatus' and request.request_type==1:
                                             response_payload=await asyncio.to_thread(build_status_response)
+                                        elif request.resource_path=='/clipboard':
+                                            response_payload=build_clipboard_status(request.payload,request_type=request.request_type)
                                         elif request.resource_path==LOCK_PATH and request.request_type==1:
                                             response_payload=await asyncio.to_thread(handle_modern,request.payload,sender=sender,paired_partner=partner)
                                         if response_payload is not None:

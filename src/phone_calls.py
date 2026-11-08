@@ -163,7 +163,11 @@ class CallAudio:
             if self.processes:return
             if not any(c.get('State') in ('active','dialing','alerting') for c in self.calls.get_calls()):
                 raise PhoneUnavailable('No active or outgoing call')
-            self.calls.activate_audio()
+            # PipeWire can open SCO automatically before our explicit request.
+            # Reusing an existing transport avoids an AlreadyConnected/InProgress
+            # error being reported for a call that is already ringing audibly.
+            try:self._nodes(self._graph())
+            except PhoneUnavailable:self.calls.activate_audio()
             self.state='connecting'
             deadline=time.monotonic()+8
             while True:

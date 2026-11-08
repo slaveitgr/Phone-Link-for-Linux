@@ -1,12 +1,12 @@
 """Persistent user service: keeps the phone connection independent of its window."""
-import asyncio,time,json
+import asyncio,time,json,threading
 from account_store import load_account,save_account
 from secret_store import KeyringLocked
 from phone_app import status
 from relay_live import run
 from msa_oauth import refresh_tokens
 from identity_service import IdentityService
-from runtime_cache import start_bridge
+from runtime_cache import start_bridge,update_contacts,update_call_history,update_phone_favorites
 from tray_icon import start_tray
 from crossdevice_role import connection_account
 from device_identity import DeviceIdentity
@@ -44,7 +44,38 @@ async def connection_cycle(account,duration):
     if account.get('wea_enabled') is True and account.get('wea',{}).get('enrollment'):tasks.append(serve(connection_account(account),'WEA'))
     await asyncio.gather(*tasks)
 
+def sync_phone_contacts():
+    try:
+        from phone_contacts_bluetooth import pull_contacts
+        update_contacts([],status='syncing')
+        result=pull_contacts()
+        if result['status']=='ok':
+            update_contacts(result['contacts'],status='ok',full=True)
+        else:update_contacts([],status=result['status'])
+        print(json.dumps({'event':'bluetooth_contacts_sync','status':result['status'],'count':result['count']}),flush=True)
+    except Exception as error:
+        update_contacts([],status='bluetooth_unavailable')
+        print(json.dumps({'event':'bluetooth_contacts_sync_error','type':type(error).__name__}),flush=True)
+
+    from phone_call_history import pull_call_history,pull_favorites
+    from phone_calls import PhoneCalls
+    from phone_config import bluetooth_address
+    while True:
+        try:
+            address=bluetooth_address()
+            active=bool(address and PhoneCalls(address).status().get('calls'))
+            if not active:
+                history=pull_call_history()
+                update_call_history(history['calls'],history['status'])
+                favorites=pull_favorites()
+                update_phone_favorites(favorites['favorites'],favorites['status'])
+                print(json.dumps({'event':'bluetooth_call_data_sync','history_status':history['status'],'history_count':history['count'],'favorites_status':favorites['status'],'favorites_count':favorites['count']}),flush=True)
+        except Exception as error:
+            print(json.dumps({'event':'bluetooth_call_data_error','type':type(error).__name__}),flush=True)
+        time.sleep(60)
+
 bridge=start_bridge()
+threading.Thread(target=sync_phone_contacts,daemon=True).start()
 tray=start_tray()
 account=None
 retry=5
