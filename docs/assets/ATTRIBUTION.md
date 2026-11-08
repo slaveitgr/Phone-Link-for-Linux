@@ -1,6 +1,6 @@
 # Desktop icon
 
-`icon.svg` is the exact `devices/scalable/phone.svg` icon resolved by the app's
+`app-icon.svg` (also retained as `icon.svg`) is the exact `devices/scalable/phone.svg` icon resolved by the app's
 `Icon=phone` desktop entry under the installed WhiteSur icon theme.
 
 Source: [WhiteSur icon theme](https://github.com/vinceliuice/WhiteSur-icon-theme)

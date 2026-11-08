@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="docs/assets/icon.svg" width="112" height="112" alt="Phone Link for Linux icon">
+  <img src="docs/assets/app-icon.svg" width="112" height="112" alt="Phone Link for Linux icon">
 
 # Phone Link for Linux
 
