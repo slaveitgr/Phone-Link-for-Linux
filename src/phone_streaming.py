@@ -11,7 +11,9 @@ class PhoneStreaming:
     def status(self):
         try:serial,reason=_selected_android()
         except (OSError,subprocess.SubprocessError):serial=None;reason='wifi_phone_unavailable'
-        return {'available':bool(serial and find_scrcpy()),'reason':reason,'transport':'wifi','running':sum(p.poll() is None for p in self.processes.values())}
+        with self.lock:
+            active=[key for key,p in self.processes.items() if p.poll() is None]
+        return {'available':bool(serial and find_scrcpy()),'reason':reason,'transport':'wifi','running':len(active),'active':active}
     def start(self,*,package=None,user_initiated=False):
         if not user_initiated:raise PermissionError('Explicit screen/app streaming request required')
         if package is not None and not re.fullmatch(r'[A-Za-z][A-Za-z0-9_]*(?:\.[A-Za-z0-9_]+)+',package):raise ValueError('Invalid Android app package')
@@ -28,15 +30,25 @@ class PhoneStreaming:
             if server.is_file():env['SCRCPY_SERVER_PATH']=str(server)
             process=subprocess.Popen(command,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,env=env,start_new_session=True)
             self.processes[key]=process
-            return {'status':'starting','transport':'wifi'}
+            try:code=process.wait(timeout=.8)
+            except subprocess.TimeoutExpired:return {'status':'running','transport':'wifi'}
+            return {'status':'stream_ended' if code==0 else 'stream_start_failed','exit_code':code,'transport':'wifi'}
     def stop(self,package=None):
         with self.lock:
             key=package or 'screen';process=self.processes.pop(key,None)
             if process and process.poll() is None:
-                os.killpg(process.pid,signal.SIGTERM)
+                try:os.killpg(process.pid,signal.SIGTERM)
+                except ProcessLookupError:return {'status':'stopped'}
                 try:process.wait(timeout=3)
-                except subprocess.TimeoutExpired:process.kill()
+                except subprocess.TimeoutExpired:
+                    try:os.killpg(process.pid,signal.SIGKILL)
+                    except ProcessLookupError:pass
+                    process.wait(timeout=3)
             return {'status':'stopped'}
+    def stop_all(self):
+        with self.lock:
+            for key in list(self.processes):self.stop(None if key=='screen' else key)
+
     def list_apps(self):
         serial,reason=_selected_android();binary=find_scrcpy()
         if reason or not binary:return {'status':reason or 'scrcpy_missing','apps':[]}

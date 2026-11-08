@@ -7,7 +7,7 @@ from phone_calls import PhoneCalls,CallAudio
 class CallController:
     def __init__(self,app):
         self.app=app;self.phone=PhoneCalls(bluetooth_address()) if bluetooth_address() else None;self.audio=CallAudio(self.phone) if self.phone else None
-        self.info={'available':False,'calls':[]};self.busy=False;self.action_busy=False;self.error='';self.popup=None;self.audio_busy=False;self.audio_state='idle'
+        self.info={'available':False,'calls':[]};self.busy=False;self.action_busy=False;self.error='';self.popup=None;self.audio_busy=False;self.audio_state='idle';self.media_cleanup_needed=True
         GLib.timeout_add_seconds(1,self.tick)
     def tick(self):
         if not self.busy:
@@ -17,6 +17,11 @@ class CallController:
     def read(self):
         try:info=self.phone.status() if self.phone else {'available':False,'calls':[]}
         except Exception:info={'available':False,'calls':[]}
+        if self.phone and info.get('available') and not info.get('calls') and self.media_cleanup_needed:
+            try:
+                if self.phone.disconnect_media_audio():self.media_cleanup_needed=False
+            except Exception:pass
+        if info.get('calls'):self.media_cleanup_needed=True
         GLib.idle_add(self.update,info)
     def update(self,info):
         self.busy=False;self.info=info

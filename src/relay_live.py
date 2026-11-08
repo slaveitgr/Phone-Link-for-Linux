@@ -21,7 +21,10 @@ sys.path.insert(0,str(Path(__file__).resolve().parent/'generated'))
 from platform_sdk.v1.device_resource_manager_pb2 import DeviceResourceManagerMessage,DeviceResourceManagerResponseMessage
 from device_info.v1.status_pb2 import DeviceStatusResponseMessage,DeviceStatusRequestMessage
 from phone_contacts import ContactSync
-from runtime_cache import update_contacts
+from phone_files_client import metadata_request,thumbnail_request,parse_get_response,parse_configuration_publication
+from runtime_cache import update_photos,update_photo_thumbnail,update_photo_preview
+from runtime_cache import update_contacts,update_messages
+from phone_sms_native import metadata_request as sms_metadata_request,parse_metadata as parse_sms_metadata
 from phone_wallpaper import wallpaper_request,cache_home_wallpaper,cache_legacy_home_wallpaper
 from value_set.valueset_pb2 import ValueSet
 from platform_sdk.v1.msaep_message_pb2 import MsaepMessage
@@ -79,6 +82,10 @@ async def run(account,*,duration=None,profile="PL"):
         request_ids=set()
         pending_resources={}
         pending_contacts={}
+        sms_requested_at=0
+        file_requests={}
+        phone_files={}
+        file_cursors=set()
         latest_contact_query=None
         last_phone_refresh=0
         sequence=1
@@ -153,12 +160,26 @@ async def run(account,*,duration=None,profile="PL"):
             if time.monotonic()-last_ping>=15:
                 await websocket.send(frame([6]));last_ping=time.monotonic()
             if partner_connected and profile=="PL":
+                if sms_requested_at and time.monotonic()-sms_requested_at>30:
+                    sms_requested_at=0;update_messages(status='timeout')
                 if configured and time.monotonic()-last_phone_refresh>60:
                     await request_status()
                     last_phone_refresh=time.monotonic()
                 command=take_command()
                 if command:
-                    if command.get('kind')=='search_contacts':
+                    if command.get('kind')=='sync_messages':
+                        update_messages(status='syncing');sms_requested_at=time.monotonic()
+                        await send_payload('/legacy/phonecontent',sms_metadata_request(str(uuid.uuid4()),account['client_id']).SerializeToString())
+                    elif command.get('kind')=='sync_photos':
+                        phone_files.clear();file_cursors.clear();update_photos([],status='syncing')
+                        identifier,_=await send_payload('/DeviceResourceManager',metadata_request(),plane=1)
+                        pending_resources[identifier]='phone_files';file_requests[identifier]='metadata'
+                    elif command.get('kind') in ('photo_thumbnail','photo_preview'):
+                        item=phone_files.get(command['file_id'])
+                        if item:
+                            identifier,_=await send_payload('/DeviceResourceManager',thumbnail_request(item,width=1024 if command['kind']=='photo_preview' else 256,height=1024 if command['kind']=='photo_preview' else 256),plane=1)
+                            pending_resources[identifier]='phone_files';file_requests[identifier]=command['kind']
+                    elif command.get('kind')=='search_contacts':
                         latest_contact_query=command['query']
                         sync=ContactSync(latest_contact_query)
                         identifier,_=await send_payload('/DeviceResourceManager',sync.request(),plane=1)
@@ -301,6 +322,12 @@ async def run(account,*,duration=None,profile="PL"):
                             if headers.get('_route') in ('/legacy/phonecontent','/internal/response'):
                                 try:
                                     values=ValueSet.FromString(payload)
+                                    if sms_requested_at:
+                                        metadata=parse_sms_metadata(values)
+                                        if metadata is not None:
+                                            sms_requested_at=0
+                                            update_messages(status='metadata_received' if metadata['ids'] else 'ok')
+                                            print(json.dumps({'event':'sms_metadata_received','count':metadata['total_count'],'selected_count':len(metadata['ids'])}),flush=True)
                                     related=headers.get('_requestId') or headers.get('_responseId') or headers.get('_originalRequestId')
                                     if related in request_ids and ('capabilities' in values.entries or 'deviceConfiguration' in values.entries):
                                         configured=True
@@ -335,7 +362,25 @@ async def run(account,*,duration=None,profile="PL"):
                             if resource is None:continue
                             try:
                                 wrapper=DeviceResourceManagerResponseMessage.FromString(payload)
-                                if resource=='contacts':
+                                if resource=='phone_files':
+                                    kind=file_requests.pop(related,None)
+                                    result=parse_get_response(wrapper.payload)
+                                    if kind=='metadata':
+                                        if result['status']!='ok':update_photos([],status=result['status'])
+                                        else:
+                                            for item in result.get('files',[]):
+                                                if item['file_type']==1 and not item['is_directory']:phone_files[item['id']]=item
+                                            photos=sorted(phone_files.values(),key=lambda f:f.get('modified_at',''),reverse=True)[:200]
+                                            update_photos(photos,status='syncing' if result.get('has_more') else 'ok')
+                                            cursor=result.get('continuation')
+                                            if result.get('has_more') and cursor not in file_cursors and len(file_cursors)<20:
+                                                file_cursors.add(cursor)
+                                                identifier,_=await send_payload('/DeviceResourceManager',metadata_request(continuation=cursor),plane=1)
+                                                pending_resources[identifier]='phone_files';file_requests[identifier]='metadata'
+                                    elif result.get('data_url'):
+                                        (update_photo_preview if kind=='photo_preview' else update_photo_thumbnail)(result['metadata']['id'],result['data_url'])
+                                    print(json.dumps({'event':'phone_photos_response','status':result['status'],'kind':kind,'image_count':len(phone_files),'outer_status':result.get('outer_status'),'nested_status':result.get('nested_status'),'wire_kind':result.get('wire_kind'),'thumbnail_bytes':result.get('thumbnail_bytes')}),flush=True)
+                                elif resource=='contacts':
                                     sync=pending_contacts.pop(related,None)
                                     if sync is None or sync.query!=latest_contact_query:continue
                                     result=sync.consume(wrapper.payload)

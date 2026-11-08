@@ -10,6 +10,7 @@ RUNTIME=Path(os.environ.get('XDG_RUNTIME_DIR','/run/user/'+str(os.getuid())))/'t
 SOCKET=RUNTIME/'view.sock'
 _lock=threading.RLock()
 _notifications={}
+_backend_instance=uuid.uuid4().hex
 _sync=False
 _commands=queue.Queue(maxsize=20)
 _results={}
@@ -21,6 +22,11 @@ _call_history=[]
 _phone_favorites=[]
 _history_status="syncing"
 _favorites_status="syncing"
+_phone_photos=[]
+_photos_status="not_synced"
+_phone_messages={"status":"not_loaded","messages":[],"source":"native_relay"}
+_photo_thumbnails={}
+_photo_previews={}
 
 def update_notifications(records,*,replace=False,removed=()):
     global _sync
@@ -39,8 +45,8 @@ def update_notifications(records,*,replace=False,removed=()):
 
 def snapshot():
     with _lock:
-        return {'schema_version':1,'notifications_synced':_sync,
-            'notifications':list(_notifications.values()),'contacts':list(_contacts),'contacts_status':_contacts_status,'contacts_full':_contacts_full,'call_history':list(_call_history),'phone_favorites':list(_phone_favorites),'history_status':_history_status,'favorites_status':_favorites_status,'clipboard':_clipboard,'command_results':dict(_results),
+        return {'schema_version':1,'backend_instance':_backend_instance,'notifications_synced':_sync,
+            'notifications':list(_notifications.values()),'contacts':list(_contacts),'contacts_status':_contacts_status,'contacts_full':_contacts_full,'call_history':list(_call_history),'phone_favorites':list(_phone_favorites),'history_status':_history_status,'favorites_status':_favorites_status,'phone_messages':dict(_phone_messages),'phone_photos':list(_phone_photos),'photos_status':_photos_status,'photo_thumbnails':dict(_photo_thumbnails),'photo_previews':dict(_photo_previews),'clipboard':_clipboard,'command_results':dict(_results),
             'updated_at':datetime.now(timezone.utc).isoformat()}
 
 class _Handler(socketserver.StreamRequestHandler):
@@ -58,6 +64,12 @@ class _Handler(socketserver.StreamRequestHandler):
             if action=='copy_text':
                 if not isinstance(request.get('text'),str) or len(request['text'].encode())>65536:return
                 payload={'text':request['text']}
+            elif action=='sync_messages':payload={'kind':'sync_messages'}
+            elif action=='sync_photos':payload={'kind':'sync_photos'}
+            elif action in ('photo_thumbnail','photo_preview'):
+                identifier=request.get('id')
+                if not isinstance(identifier,str) or len(identifier)>100:return
+                payload={'kind':action,'file_id':identifier}
             elif action=='search_contacts':
                 query=request.get('query')
                 if not isinstance(query,str) or not query.strip() or len(query)>500:return
@@ -136,3 +148,30 @@ def update_call_history(records,status='ok'):
 def update_phone_favorites(records,status='ok'):
     global _phone_favorites,_favorites_status
     with _lock:_phone_favorites=list(records[:20000]);_favorites_status=status
+
+
+def update_photos(records,status='ok'):
+    global _phone_photos,_photos_status
+    with _lock:_phone_photos=list(records[:200]);_photos_status=status
+
+def update_photo_thumbnail(identifier,data_url):
+    with _lock:
+        _photo_thumbnails[str(identifier)]=data_url
+        while len(_photo_thumbnails)>12:_photo_thumbnails.pop(next(iter(_photo_thumbnails)))
+
+def photo_command(action,identifier=None):
+    request={'action':action}
+    if identifier is not None:request['id']=identifier
+    with socket.socket(socket.AF_UNIX,socket.SOCK_STREAM) as client:
+        client.settimeout(2);client.connect(str(SOCKET));client.sendall(json.dumps(request).encode()+b'\n')
+        with client.makefile('rb') as stream:return json.loads(stream.readline(4096))
+
+
+def update_photo_preview(identifier,data_url):
+    with _lock:
+        _photo_previews.clear();_photo_previews[str(identifier)]=data_url
+
+
+def update_messages(records=(),status='ok'):
+    global _phone_messages
+    with _lock:_phone_messages={'status':status,'messages':list(records[:50]),'source':'native_relay'}

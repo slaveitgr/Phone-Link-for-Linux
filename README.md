@@ -39,7 +39,7 @@ The distinction below matters: **verified** means observed on the development de
 | Notifications | **Verified** | Real notifications received through the paired relay. |
 | Text clipboard | **Verified** | Manual text transfer; received PC text was observed on the phone. |
 | Bluetooth calls | **Verified** | Dial, answer and hang up through PipeWire telephony. Laptop speakers and microphone were tested. |
-| Embedded dialer | **Implemented** | Calls stays inside Phone Link; a separate popup is reserved for incoming calls. |
+| Embedded dialer and incoming popup | **Verified** | User-tested incoming call: the embedded dialer and automatic incoming-only popup both worked. |
 | Contacts | **Verified** | **941 real contacts** imported from the development phone through Bluetooth PBAP. |
 | Recent calls | **Verified** | **50 recent entries** returned by the phone, with real directions and timestamps. |
 | Phone favorites | **Verified** | **1 real favorite** imported from the phone; matched to contacts by number. |
@@ -48,16 +48,17 @@ The distinction below matters: **verified** means observed on the development de
 | Lock PC from the phone | **Verified** | The laptop locked and the phone displayed `Locked`. After reconnect, normal battery/Wi-Fi returned. |
 | GNOME Applications companion | **Implemented** | Phone panel with wallpaper, status and shortcuts; validated in a private GNOME session. Installation requires a fresh GNOME session. |
 | SMS messages | **In progress** | Read-only Bluetooth MAP helper exists; live message access has not yet succeeded. |
-| Wireless photos and files | **In progress** | Native PhoneFiles metadata/thumbnail protocol identified; gallery and full file access are not yet complete. |
-| Wireless screen mirroring | **In progress** | Wi-Fi connection and Linux receiver groundwork; native Microsoft streaming handshake remains incomplete. |
-| Individual Android app streaming | **In progress** | Separate app-window streaming is a planned core feature, distinct from whole-screen mirroring. |
-| Wireless Android webcam | **In progress** | Wi-Fi camera controller exists; virtual-camera activation and a real conferencing-app test remain outstanding. |
+| Photo gallery | **Verified** | Real native metadata, thumbnails and 1024-pixel previews; 11,882 image records were returned, with the latest 200 shown. |
+| Wi-Fi files and original photos | **Verified transport; UI implemented** | Send/receive roundtrip and original-photo download tested over authorized Wi-Fi ADB. Read-only phone storage mounted in the file manager. |
+| Wireless screen mirroring | **Implemented** | Explicit Start/Stop through the Linux scrcpy receiver. The phone-side Microsoft Mirror button and proprietary handshake remain incomplete. |
+| Individual Android app streaming | **Verified transport; UI implemented** | Android Settings opened in its own Wi-Fi desktop window. App inventory, launch and individual Stop controls are integrated. |
+| Wireless Android webcam | **In progress** | Wi-Fi controller and a writable V4L2 loopback device are ready. Camera activation and a real conferencing-app test remain outstanding. |
 
 ### Connection methods
 
 - **Microsoft relay:** account pairing, notifications, device state and clipboard integration.
 - **Bluetooth:** phone calls, contact book, recent calls and favorites.
-- **Wi-Fi:** required operating transport for the planned photo/file access, screen/app streaming and webcam features. USB-only implementations do not satisfy those roadmap items.
+- **Wi-Fi:** operating transport for original file access, screen/app streaming and webcam features through an explicitly authorized wireless ADB connection. USB-only implementations do not satisfy those roadmap items.
 
 The Linux scrcpy-based receiver work is separate from Microsoft's proprietary media transport. Initial Android debugging authorization may be needed for that receiver; it is not the same as Microsoft account pairing.
 
@@ -70,21 +71,26 @@ Development snapshot: **8 November 2026**, Ubuntu/GNOME 51, POCO F8 Ultra.
 - Microsoft sign-in completed and pairing survived reopening the app.
 - Actual wallpaper, phone status and notifications reached Linux.
 - Text sent from the PC appeared in the phone's recent clipboard activity.
+- A user-initiated incoming-call acceptance test confirmed the dialer and incoming-only popup.
 - A real Bluetooth call used the laptop's speakers **and** microphone.
 - The phone's address book returned 941 contacts, 50 recent calls and 1 favorite.
 - A real contact's JPEG photo was retrieved through PBAP.
 - Phone-initiated PC locking worked. The stale Locked state was cleared, and laptop battery/Wi-Fi returned afterward.
+- Native photo metadata, raster thumbnails and previews were received from the paired phone.
+- A Wi-Fi file-transfer roundtrip preserved the test file bytes; an original photo matched its metadata size.
+- Phone shared storage mounted read-only and returned 29 root entries through Wi-Fi.
+- Android Settings streamed into a separate desktop window over Wi-Fi.
 - The application switched away from the embedded dialer after the cross-frame navigation fix.
 
 ### Automated and isolated checks
 
-- **40 Python unit tests passed** in the development environment.
+- **51 Python unit tests passed** in the development environment.
 - A JavaScript regression test covers `Calls → Photos` and `Calls → Clipboard` across opaque local-file frame origins.
 - The same regression test checks that incoming status/notification updates preserve the current dialer frame and typed input.
 - JavaScript syntax and Python compilation checks passed.
 - GNOME launcher checks covered Super, search/categories, Escape, outside-click closing, re-enable and destroyed-actor cleanup in a separate compositor.
 
-**Still needs a real acceptance test:** the new incoming-call popup, automatic repeat lock/unlock cycles, the latest call-audio retry changes, and every wireless camera/streaming flow. Passing a protocol parser test is not proof that a phone feature works end to end.
+**Still needs a real acceptance test:** automatic repeat lock/unlock cycles, the latest call-audio retry changes, the webcam in a conferencing app, whole-screen mirroring, and the full file/app UI acceptance flows. Passing a protocol parser test is not proof that a phone feature works end to end.
 
 ## Installation
 
@@ -100,7 +106,7 @@ The tested desktop is **Ubuntu with GNOME 51**. Older PipeWire builds may not ex
 
 ```bash
 sudo apt install python3-venv python3-gi gir1.2-gtk-4.0 \
-  gir1.2-webkit-6.0 pipewire wireplumber bluez bluez-obexd
+  gir1.2-webkit-6.0 pipewire wireplumber bluez bluez-obexd adb libfuse2t64 fuse3
 
 git clone https://github.com/slaveitgr/Phone-Link-for-Linux.git
 cd Phone-Link-for-Linux
@@ -125,6 +131,14 @@ Pair the phone in the Linux Bluetooth settings. Set its confirmed address in:
 
 The address is an example. Contact/message-sharing permissions are approved on the phone. No personal device address is shipped in the repository.
 
+### Optional wireless services
+
+Install a recent [scrcpy](https://github.com/Genymobile/scrcpy) with Android app-window and camera support. The development receiver uses version 5.0.1; scrcpy binaries are not bundled in this repository.
+
+Connect the trusted phone for initial debugging authorization, keep it on the same Wi-Fi, and choose **Settings → Set up Wi-Fi**. Subsequent file transfers and streams select the authorized wireless connection. The read-only phone mount uses FUSE and is started after successful explicit Wi-Fi setup. Phone reboot or network changes may require reconnecting.
+
+The webcam additionally requires a writable `v4l2loopback` virtual video device configured for your distribution. The app does not install or load kernel modules automatically. Camera capture starts only with **Start**, and stops with **Stop**.
+
 ### Services
 
 ```bash
@@ -134,6 +148,8 @@ systemctl --user status tahoe-phone-link-ui.service
 tahoe-phone-link open
 tahoe-phone-link calls
 tahoe-phone-link clipboard
+tahoe-phone-link files
+tahoe-phone-link apps
 ```
 
 Closing the desktop window hides it while the user service remains available for incoming-call handling.
@@ -148,10 +164,19 @@ Closing the desktop window hides it while the user service remains available for
 - [x] Fix navigation around the embedded dialer and preserve typed input during updates.
 - [x] Read real contacts, recent calls and phone favorites.
 - [x] Retrieve real contact photos and add lazy avatar loading.
-- [ ] Validate the incoming-call popup with a real incoming call.
+- [x] Validate the incoming-call popup with a real incoming call.
 - [ ] Re-test call-audio retries and make Bluetooth media routing explicitly calls-only.
 - [ ] Validate repeated lock/unlock reconnects and eliminate delayed laptop-status refreshes.
 - [ ] Add reconnect controls, clearer permission states and broader distribution testing.
+
+### Original Windows UI reconstruction
+
+- [x] Inventory the supplied Windows package and identify the correct full x64 build.
+- [x] Recover the Start companion layout and identify desktop WinUI/XBF views.
+- [ ] Decode the relevant XBF layout trees and reconstruct the selected desktop shell.
+- [ ] Compare the same-version Windows and Linux UI at matching scale, including call states.
+
+See [original-package findings](docs/original-ui-analysis.md). The repository contains our analysis, not extracted Microsoft UI assets.
 
 ### Communication
 
@@ -163,11 +188,11 @@ Closing the desktop window hides it while the user service remains available for
 
 ### Wireless media and desktop integration
 
-- [ ] Receive native photo/file metadata and real thumbnails over Wi-Fi.
-- [ ] Download/open original photos and transfer selected files.
-- [ ] Expose the phone in the Linux file manager alongside other locations/drives.
+- [x] Receive native photo/file metadata and real thumbnails over Wi-Fi.
+- [x] Download/open original photos and transfer selected files.
+- [x] Expose the phone in the Linux file manager alongside other locations/drives.
 - [ ] Make whole-screen mirroring work over Wi-Fi with explicit Start/Stop.
-- [ ] Stream individual Android apps into separate desktop windows.
+- [x] Stream individual Android apps into separate desktop windows.
 - [ ] Make the phone's Wi-Fi camera available as a real V4L2 webcam.
 - [ ] Validate the webcam in a conferencing app and OBS.
 - [ ] Complete the GNOME Applications companion integration in a fresh session.
@@ -179,7 +204,7 @@ Link to Windows / Android
     ├── Microsoft DCG + SignalR ─── relay_service.py
     ├── Bluetooth HFP ───────────── phone_calls.py / PipeWire
     ├── Bluetooth PBAP ──────────── contacts, favorites, call history, photos
-    └── Wireless media ──────────── receiver work in progress
+    └── Authorized Wi-Fi ADB ────── files / FUSE / scrcpy receiver
                                       │
                          same-user private Unix socket
                                       │
@@ -220,6 +245,8 @@ GitHub Actions runs the source checks. Live-device tests are reported separately
 - Contacts, messages, notification text, call records and contact photos stay in RAM.
 - Temporary Bluetooth transfer files use private directories and are removed after decoding.
 - The home wallpaper and nonsecret device-status cache are stored locally.
+- Gallery previews stay in memory; downloaded originals and received files are saved under `Downloads/Phone Link` only after an explicit action. Existing files are preserved.
+- The read-only mount caches bounded file chunks in RAM, not a persistent mirror of phone storage.
 - Call audio routing is scoped to the selected phone and restores the previous microphone mute state.
 - This repository excludes account exports, phone captures, private keys, device identifiers and personal phone data.
 

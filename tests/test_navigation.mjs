@@ -4,7 +4,7 @@ import vm from 'node:vm';
 import assert from 'node:assert/strict';
 const elements=new Map();let iframe=null,messages=0;
 function element(selector){if(!elements.has(selector)){let html='';elements.set(selector,{style:{},classList:{toggle(){},add(){},remove(){}},set innerHTML(value){html=value;if(selector==='#view')iframe=value.includes('native-dialer')?{contentWindow:new Proxy({postMessage(){messages++}},{get(target,key){if(key in target)return target[key];throw new Error('Cross-origin frame property access')}})}:null},get innerHTML(){return html}})}return elements.get(selector)}
-const context={window:{},document:{addEventListener(){}},$:s=>s==='#native-dialer'?iframe:element(s),icon:()=>'<svg/>',esc:String,setInterval(){},setTimeout(){}};
+const context={window:{webkit:{messageHandlers:{phoneLink:{postMessage(){}}}}},document:{addEventListener(){},querySelectorAll(){return []}},IntersectionObserver:class{observe(){}disconnect(){}},requestAnimationFrame(){},$:s=>s==='#native-dialer'?iframe:element(s),icon:()=>'<svg/>',esc:String,setInterval(){},setTimeout(){}};
 vm.createContext(context);
 vm.runInContext(readFileSync(fileURLToPath(new URL('../src/ui/native.js',import.meta.url)),'utf8'),context);
 context.window.phoneLinkUpdate({state:'connected',device:{name:'Test phone'},notifications:[]});
@@ -14,7 +14,7 @@ const original=iframe;
 context.window.phoneLinkUpdate({state:'connected',device:{name:'Test phone'},notifications:[{title:'New notification'}]});
 assert.equal(iframe,original,'Phone updates preserve the current dialer input and iframe');
 context.window.phoneLinkNavigate('photos');
-assert.match(element('#view').innerHTML,/Photos sync is not connected yet/);
+assert.match(element('#view').innerHTML,/page-title">Photos/);
 context.window.phoneLinkNavigate('calls');
 context.window.phoneLinkNavigate('clipboard');
 assert.match(element('#view').innerHTML,/clipboard-text/);

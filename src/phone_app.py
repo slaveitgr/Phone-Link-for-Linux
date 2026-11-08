@@ -43,6 +43,13 @@ class PhoneApp(Gtk.Application):
         self.hold()
         from call_controller import CallController
         self.call_controller=CallController(self)
+        from phone_streaming import PhoneStreaming
+        from webcam_controller import WebcamController
+        self.streaming=PhoneStreaming();self.webcam_controller=WebcamController()
+        self.file_state={'status':'not_loaded','files':[]}
+        self.transfer_state=''
+        self.phone_apps={'status':'not_loaded','apps':[]}
+        self.phone_messages={'status':'not_loaded','messages':[]}
         self.connect('activate',self.activate_ui)
         calls_action=Gio.SimpleAction.new('calls',None)
         calls_action.connect('activate',lambda *_:self.open_dashboard_tab('calls'))
@@ -50,7 +57,7 @@ class PhoneApp(Gtk.Application):
         clipboard_action=Gio.SimpleAction.new('clipboard',None)
         clipboard_action.connect('activate',lambda *_:self.open_dashboard_tab('clipboard'))
         self.add_action(clipboard_action)
-        for tab in ('notifications','messages','photos','settings'):
+        for tab in ('notifications','messages','photos','settings','files','apps'):
             action=Gio.SimpleAction.new(tab,None)
             action.connect('activate',lambda _,param,target=tab:self.open_dashboard_tab(target))
             self.add_action(action)
@@ -61,6 +68,11 @@ class PhoneApp(Gtk.Application):
         self.device_auth=None
         self.account=None
         self.pairing_started=False
+
+    def do_shutdown(self):
+        self.streaming.stop_all()
+        self.webcam_controller.stop()
+        Gtk.Application.do_shutdown(self)
 
     def activate_ui(self,*args):
         if self.window:

@@ -87,6 +87,23 @@ class PhoneCalls:
     def hangup(self,path):
         self._call(self._owned_call(path),CALL,'Hangup')
 
+    def disconnect_media_audio(self):
+        """Keep this phone's HFP calls while releasing its separate A2DP media."""
+        bus=Gio.bus_get_sync(Gio.BusType.SYSTEM,None)
+        objects=_unpack(bus.call_sync('org.bluez','/','org.freedesktop.DBus.ObjectManager',
+            'GetManagedObjects',None,None,Gio.DBusCallFlags.NONE,3000,None))[0]
+        for path,interfaces in objects.items():
+            device=interfaces.get('org.bluez.Device1',{})
+            if str(device.get('Address','')).upper()!=self.address or not device.get('Connected'):continue
+            source='0000110a-0000-1000-8000-00805f9b34fb'
+            if source not in device.get('UUIDs',[]):return True
+            try:bus.call_sync('org.bluez',path,'org.bluez.Device1','DisconnectProfile',
+                GLib.Variant('(s)',(source,)),None,Gio.DBusCallFlags.NONE,3000,None)
+            except GLib.Error as error:
+                if Gio.DBusError.get_remote_error(error)!='org.bluez.Error.NotConnected':return False
+            return True
+        return False
+
     def activate_audio(self):
         """Request SCO only for a live call. This does not route/unmute the mic."""
         gateway=self._gateway()
