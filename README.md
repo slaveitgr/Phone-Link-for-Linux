@@ -225,6 +225,10 @@ GitHub Actions runs the source checks. Live-device tests are reported separately
 
 When reporting a problem, provide the relevant component and redacted error type. Keep message bodies, contact details, account tokens and personal captures out of public issues.
 
+## Branding
+
+The README uses the **same phone icon as the running desktop app in the dock**, supplied by the WhiteSur icon theme. [Icon attribution and license](docs/assets/ATTRIBUTION.md).
+
 ## Protocol provenance
 
 The implementation is based on wire-format observations from user-supplied Phone Link / Link to Windows artifacts and public Linux APIs. Microsoft app packages and decompiled implementation source are not redistributed. Included generated protocol bindings retain their generated notices.
