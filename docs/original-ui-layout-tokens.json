@@ -1,0 +1,186 @@
+{
+  "source": {
+    "package_sha256": "a36dbac4826a713509cfe5a0eeacad545357bd3dfd0de53c4004c51f30d64f1b",
+    "resources_pri_sha256": "99a7ac20ed1feecfded928bc6390ad077a2eaea6a3780b244520a8478764de6a",
+    "decoder_git_commit": "dbeadcd75f30fb8dea3109039e0082854cb9a89d",
+    "decoded": 262,
+    "candidates": 263,
+    "failed_offsets": [
+      416104
+    ]
+  },
+  "shell": {
+    "source": "402932.xaml",
+    "class": "YourPhone.Shell.TopNavShell",
+    "top_navigation": true,
+    "left_pane": "device and notifications",
+    "open_pane_length": 360,
+    "compact_pane_length": 40,
+    "inline_nav_margin": [
+      0,
+      36,
+      0,
+      0
+    ],
+    "title_shadow_height": 36,
+    "content_padding": 0,
+    "states": [
+      "Hidden",
+      "Collapsed",
+      "Overlay",
+      "Inline",
+      "Takeover"
+    ]
+  },
+  "typography": {
+    "source": "1473232.xaml",
+    "title": {
+      "size": 28,
+      "weight": 600
+    },
+    "title_large": {
+      "size": 40,
+      "weight": 600
+    },
+    "subtitle": {
+      "size": 20,
+      "weight": 600
+    },
+    "body": {
+      "size": 14,
+      "weight": 400
+    },
+    "body_strong": {
+      "size": 14,
+      "weight": 600
+    },
+    "caption": {
+      "size": 12,
+      "weight": 400
+    },
+    "display": {
+      "size": 68,
+      "weight": 600
+    }
+  },
+  "panes": {
+    "source": "1473232.xaml",
+    "navigation_medium_width": 320,
+    "primary_min_width": 380,
+    "secondary_min_length": 320,
+    "secondary_medium": 400,
+    "secondary_xl": 600,
+    "small_window_width": 820
+  },
+  "dark": {
+    "source": "1355108.xaml",
+    "navigation": "#3B3B3B",
+    "primary": "#2B2B2B",
+    "secondary": "#333333",
+    "content": "#242424",
+    "titlebar_hover": "#FFFFFF1A",
+    "titlebar_pressed": "#FFFFFF33"
+  },
+  "device": {
+    "source": "1036136.xaml",
+    "image_max_height": 90,
+    "wide_image_max_width": 214,
+    "small_image": [
+      28,
+      52
+    ],
+    "info_padding": [
+      24,
+      0,
+      0,
+      0
+    ],
+    "indicator_margin": [
+      0,
+      8,
+      0,
+      0
+    ]
+  },
+  "device_indicators": {
+    "source": "1048488.xaml",
+    "glyph_size": 16,
+    "spacing": 4,
+    "battery_percent_margin": [
+      4,
+      0,
+      0,
+      0
+    ],
+    "battery_grid_margin": [
+      0,
+      2,
+      2,
+      0
+    ]
+  },
+  "quick_controls": {
+    "source": "1062232.xaml",
+    "height": 32,
+    "glyph_size": 16,
+    "radius": 4,
+    "column_spacing": 12,
+    "row_spacing": 12,
+    "top_margin": 24
+  },
+  "navigation": {
+    "source": "423932.xaml",
+    "item_min_height": 40,
+    "icon_box_margin": [
+      12,
+      0
+    ],
+    "icon_only_size": [
+      40,
+      40
+    ]
+  },
+  "calls": {
+    "source": "1161572.xaml",
+    "states": [
+      "DialConfirmationState",
+      "MiniActiveState",
+      "MiniCompactState",
+      "ActiveState"
+    ],
+    "mini_panel_width": 500,
+    "panel_padding": 12,
+    "contact_visual_size": [
+      80,
+      80
+    ],
+    "mini_action_size": [
+      40,
+      40
+    ],
+    "mini_action_radius": 20,
+    "mini_action_spacing": 40,
+    "expanded_primary_min_width": 476,
+    "compact_min_width": 320
+  },
+  "keypad": {
+    "source": "1185604.xaml",
+    "grid_spacing": [
+      8,
+      8
+    ],
+    "call_button_size": [
+      48,
+      48
+    ],
+    "call_glyph": "U+E717",
+    "secondary_text_size": 9
+  },
+  "limitations": [
+    "Static converted XAML is not observed Windows execution.",
+    "XbfTools documentation warns output can differ from source and some parser type aliases may be inaccurate.",
+    "One XBF failed; 262 converted files can still contain unresolved custom resources and dynamic bindings.",
+    "Top-navigation selected at runtime depends on feature flags and window state; this is the actual TopNavShell resource, not proof all Windows installs currently use it.",
+    "No full XAML source or proprietary assets are copied into public source by this analysis."
+  ]
+}

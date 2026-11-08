@@ -1,5 +1,5 @@
 'use strict';
-let tab='notifications',snapshot={},lastView='',dial='',clipboardDraft='',photosRequested=false;const photoThumbCache={},photoThumbRequested=new Set();let selectedPhoto=null,backendInstance=null,appsRequested=false,filesRequested=false,messagesRequested=false;const photoPreviewCache={};
+let tab='messages',snapshot={},lastView='',dial='',clipboardDraft='',photosRequested=false;const photoThumbCache={},photoThumbRequested=new Set();let selectedPhoto=null,backendInstance=null,appsRequested=false,filesRequested=false,messagesRequested=false;const photoPreviewCache={};
 const bridge=(action,extra={})=>window.webkit.messageHandlers.phoneLink.postMessage(JSON.stringify({action,...extra}));
 const header=(title,subtitle,actions='')=>`<div class="page-header"><div><h1 class="page-title">${title}</h1><p class="page-subtitle">${subtitle}</p></div><div class="header-actions">${actions}</div></div>`;
 const empty=(name,text)=>`<div class="empty-state">${icon(name)}<b>${esc(text)}</b></div>`;
@@ -14,7 +14,8 @@ function render(){
  $('#connection').innerHTML=`<span class="status-dot" style="background:${connected?'#6abf91':'#8b9099'}"></span>${connected?'Connected':'Connecting…'}`;
  if(snapshot.wallpaper)$('.phone-wallpaper').style.backgroundImage=`url("${snapshot.wallpaper}")`;
  $('#quick-controls').innerHTML=[['dnd','Do not disturb'],['bluetooth','Bluetooth'],['volume','Phone audio'],['music','Music']].map(([id,title])=>`<button disabled class="quick-toggle ${id==='bluetooth'&&d.bluetooth_enabled?'active':''}" title="${title}">${icon(id)}</button>`).join('');
- $('#navigation').innerHTML=[['notifications','Notifications'],['messages','Messages'],['photos','Photos'],['apps','Apps'],['calls','Calls'],['clipboard','Clipboard'],['files','Files']].map(([id,label])=>`<button class="nav-item ${tab===id?'active':''}" data-tab="${id}">${icon(id==='clipboard'?'phone':id)}<span>${label}</span>${id==='notifications'&&notes.length?`<span class="nav-badge">${notes.length}</span>`:''}</button>`).join('');
+ $('#navigation').innerHTML=[['messages','Messages'],['photos','Photos'],['apps','Apps'],['calls','Calls']].map(([id,label])=>`<button class="nav-item ${tab===id?'active':''}" data-tab="${id}" aria-current="${tab===id?'page':'false'}">${icon(id==='clipboard'?'phone':id)}<span>${label}</span>${id==='notifications'&&notes.length?`<span class="nav-badge">${notes.length}</span>`:''}</button>`).join('');
+ $('#sidebar-notifications').innerHTML=notes.length?notes.map(n=>`<article class="notification-card"><div class="notification-card-top">${icon('notifications')} ${esc(n.app)}</div><h3>${esc(n.title)}</h3><p>${esc(n.body)}</p></article>`).join(''):empty('notifications',"You're all caught up");
  $('#settings-nav').innerHTML=icon('settings')+'<span>Settings</span>';$('#settings-nav').classList.toggle('active',tab==='settings');
  $('#sync-state').innerHTML=icon('sync')+`<span>${connected?'Connected to your phone':'Waiting for connection'}<small>${connected?'Live device updates':''}</small></span>`;
  $('#footer-state').textContent=(d.name||'POCO')+(connected?' connected':' disconnected');
@@ -72,3 +73,5 @@ function renderPhotoViewer(){
 }
 function movePhoto(direction){const files=snapshot.phone_photos||[];if(!files.length)return;selectedPhoto=files[(files.findIndex(f=>f.id===selectedPhoto)+direction+files.length)%files.length].id;renderPhotoViewer();bridge('photo_preview',{id:selectedPhoto})}
 document.addEventListener('keydown',event=>{if(!selectedPhoto)return;if(event.key==='Escape'){selectedPhoto=null;$('#overlay-root').innerHTML=''}else if(event.key==='ArrowLeft')movePhoto(-1);else if(event.key==='ArrowRight')movePhoto(1)});
+
+document.getElementById('pane-toggle')?.addEventListener('click',event=>{const collapsed=document.body.classList.toggle('phone-pane-collapsed');event.currentTarget.setAttribute('aria-expanded',String(!collapsed));event.currentTarget.setAttribute('aria-label',collapsed?'Expand phone panel':'Collapse phone panel')});

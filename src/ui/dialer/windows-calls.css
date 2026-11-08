@@ -1,0 +1,13 @@
+/* CallingNode (1198108), Keypad (1185604), and theme dictionaries. */
+:root{font-family:'Segoe UI',sans-serif;--bg:#242424;--side:#242424;--surface:#2b2b2b;--text:#fff;--muted:#c5c5c5;--accent:#99ebff;--border:#ffffff14;--key:#ffffff0f}
+:root,body{background:var(--bg)}.dialer-app{background:var(--bg)}
+body:not(.incoming-mode) .app-body{display:grid;grid-template-columns:minmax(0,1fr) 400px}
+body:not(.incoming-mode) .activity-panel{width:auto;min-width:0;display:flex;flex-direction:column;background:var(--bg);border:0}
+body:not(.incoming-mode) .activity-header{display:none}
+body:not(.incoming-mode) .activity-panel>.search-box{order:-1;margin:24px 24px 12px;min-height:32px;height:32px;width:auto;border-radius:4px;background:#333;font-size:14px}
+body:not(.incoming-mode) .activity-tabs{margin:0 24px;padding:0;min-height:40px}.activity-tabs button{font-size:14px}
+body:not(.incoming-mode) .activity-content{padding:12px 4px 0}.list-row{border-radius:4px;padding:0 12px;min-height:64px}.list-row .avatar{width:32px;height:32px;font-size:12px;margin:8px 16px 8px 0}.list-person{gap:0}.contact-copy b{font-size:14px;font-weight:400;line-height:20px}.contact-copy small{font-size:12px;line-height:16px}.list-row time{font-size:12px}.activity-footer{display:none}
+body:not(.incoming-mode) .dial-panel{width:auto;min-width:0;background:#2b2b2b;border-left:1px solid var(--border);padding:24px 32px}.dial-heading{display:none}.dialer-content{width:100%;max-width:336px;margin:0 auto}.dialer-person>b{font-size:14px}.dialer-person .avatar,.dialer-person .default-avatar{width:48px;height:48px}.number-field input{font-size:28px}.dialer-hint{font-size:12px}.keypad{gap:8px}.key{border-radius:4px;background:var(--key);font-size:24px}.key small{font-size:12px}.call-button{width:48px;height:48px;margin-top:24px}.call-button svg{width:18px;height:18px}.dialer-bottom-note{font-size:12px}
+.active-call>.avatar{width:80px;height:80px;font-size:28px}.active-call h2{font-size:20px;font-weight:600}.active-call .call-number{font-size:14px}.call-status{font-size:14px}.call-wave{display:none}.call-note{font-size:12px}.incoming-actions{gap:40px}.incoming-actions>.call-button,.incoming-actions>.end-call{width:40px;height:40px;border-radius:20px;margin:0}
+@media(max-width:699px){body:not(.incoming-mode) .app-body{grid-template-columns:minmax(0,1fr) 320px}body:not(.incoming-mode) .dial-panel{padding:24px}.activity-tabs{gap:4px}.activity-tabs button{padding:4px;font-size:12px}}
+@media(max-width:539px){body:not(.incoming-mode) .app-body{grid-template-columns:1fr}body:not(.incoming-mode) .dial-panel{display:none}}

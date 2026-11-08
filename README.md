@@ -173,10 +173,12 @@ Closing the desktop window hides it while the user service remains available for
 
 - [x] Inventory the supplied Windows package and identify the correct full x64 build.
 - [x] Recover the Start companion layout and identify desktop WinUI/XBF views.
-- [ ] Decode the relevant XBF layout trees and reconstruct the selected desktop shell.
+- [x] Decode 262 of 263 XBF resources into actual layout trees.
+- [x] Reconstruct the TopNavShell structure, measured device panel, typography and dark palette.
+- [ ] Finish per-screen controls, glyph mapping and visual states against the decoded resources.
 - [ ] Compare the same-version Windows and Linux UI at matching scale, including call states.
 
-See [original-package findings](docs/original-ui-analysis.md). The repository contains our analysis, not extracted Microsoft UI assets.
+See [decoded layout findings](docs/windows-ui-decoded-findings.md) and [measured tokens](docs/original-ui-layout-tokens.json). The repository contains our analysis, not extracted Microsoft UI assets.
 
 ### Communication
 
