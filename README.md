@@ -115,6 +115,9 @@ python3 install.py
 
 The installer creates a **per-user** application and services. Launch **Phone Link for Linux** from Applications, sign in with Microsoft, and complete pairing in Link to Windows on the phone.
 
+For the complete QR/session bootstrap, first-run gap, and Avra OS integration, see
+[Pairing and Avra OS](docs/pairing-and-avra-os.md).
+
 ### Bluetooth configuration
 
 Pair the phone in the Linux Bluetooth settings. Set its confirmed address in:
