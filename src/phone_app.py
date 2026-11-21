@@ -122,7 +122,7 @@ class PhoneApp(Gtk.Application):
                 if self.account.get('pairing_session'):
                     GLib.idle_add(self.show_pairing)
                     return
-                GLib.idle_add(self.set_message,'Ο Microsoft λογαριασμός είναι συνδεδεμένος. Ετοιμάζεται η σύζευξη.')
+                self.prepare_pairing()
                 return
             status('signed_out','Χρειάζεται σύνδεση Microsoft στο Ubuntu.')
             if self.auto_login:GLib.idle_add(self.start_login)
@@ -139,6 +139,12 @@ class PhoneApp(Gtk.Application):
         if self.keyring_locked:
             threading.Thread(target=self.restore_connection,daemon=True).start()
         else:self.start_login()
+
+    def prepare_pairing(self):
+        from pairing_bootstrap import prepare_pairing
+        GLib.idle_add(self.set_message, 'Δημιουργείται συνεδρία σύζευξης…')
+        prepare_pairing(self.account, self.identity, save_account)
+        GLib.idle_add(self.show_pairing)
 
     def show_pairing(self):
         if self.pairing_started:return GLib.SOURCE_REMOVE
@@ -375,7 +381,9 @@ class PhoneApp(Gtk.Application):
             stored=save_account(secret)
             status('disconnected','Εγκρίθηκε η ταυτότητα του Ubuntu. Ακολουθεί σύζευξη με το POCO.',
                 authenticated=True,credentials_saved=bool(stored))
-            GLib.idle_add(self.set_message,'Η Microsoft ενέκρινε την ταυτότητα του Ubuntu. Η σύζευξη δεν έχει ολοκληρωθεί ακόμη.')
+            self.account=secret
+            if not stored:raise RuntimeError('Secure account persistence failed')
+            self.prepare_pairing()
         except HTTPError as error:
             message=f'Η υπηρεσία Microsoft επέστρεψε HTTP {error.code}. Η σύζευξη δεν ολοκληρώθηκε.'
             status('error',message,authenticated=False)
